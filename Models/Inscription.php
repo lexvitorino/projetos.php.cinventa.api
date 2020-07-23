@@ -5,10 +5,6 @@ namespace Models;
 use Exception;
 use \Core\Model;
 
-use PHPMailer\PHPMailer\PHPMailer;
-
-require 'vendor/autoload.php';
-
 class Inscription extends Model
 {
     private $subscriberId;
@@ -71,26 +67,20 @@ class Inscription extends Model
         }
     }
 
-    public function vagasValidas($chave, $data, $duplas): bool
+    public function vagasValidas($chave, $data, $cadeira): bool
     {
         try {
             $event = new Event($this->subscriberId);
             if ($event->getByChave($chave, $data)) {
 
-                $sql = "";
-                if ($duplas == "S") {
-                    $sql = "SELECT COUNT(id) as QT 
-                            FROM   inscriptions 
-                            WHERE  evento = :chave and data = :data and conjuge is not  null AND conjuge <> ''";
-                } else {
-                    $sql = "SELECT COUNT(id) as QT 
-                            FROM   inscriptions 
-                            WHERE  evento = :chave and data = :data and (conjuge is null or conjuge = '')";
-                }
+                $sql = "SELECT COUNT(id) as QT 
+                        FROM   inscriptions 
+                        WHERE  evento = :chave and data = :data and cadeira = :cadeira";
 
                 $sql = $this->db->prepare($sql);
                 $sql->bindValue(':chave', $chave);
                 $sql->bindValue(':data', $data);
+                $sql->bindValue(':cadeira', $cadeira);
                 $sql->execute();
 
                 if ($sql->rowCount() > 0) {
@@ -98,11 +88,11 @@ class Inscription extends Model
 
                     $this->result['data'] = array(
                         'inscricoes' => intval($res['QT']),
-                        'limite' => $duplas == "S" ? intval($event->getResult()['data']['dupla']) : intval($event->getResult()['data']['simples']),
+                        'limite' => $cadeira == "Dupla" ? intval($event->getResult()['data']['dupla']) : intval($event->getResult()['data']['simples']),
                     );
 
                     if (intval($this->result['data']['inscricoes']) >= intval($this->result['data']['limite'])) {
-                        $this->result['message']['errors'][] = 'Todas as ' . $this->result['data']['limite'] . ' vagas destinadas as cadeiras ' . ($duplas == "S" ? 'duplas' : 'simples') . ' foram preenchidas';
+                        $this->result['message']['errors'][] = 'Todas as ' . $this->result['data']['limite'] . ' vagas destinadas as cadeiras ' . ($cadeira == "Dupla" ? 'duplas' : 'simples') . ' foram preenchidas';
                         $this->result['message']['hasError'] = true;
                     }
 
@@ -231,18 +221,19 @@ class Inscription extends Model
             }
 
             $sql = "INSERT INTO inscriptions
-                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge)
+                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge, cadeira)
                     VALUES 
-                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge)";
+                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge, :cadeira)";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':evento', $data['evento']);
             $sql->bindValue(':email', $data['email']);
             $sql->bindValue(':data', $data['data']);
-            $sql->bindValue(':nome', $data['nome']);
-            $sql->bindValue(':sobrenome', $data['sobrenome']);
+            $sql->bindValue(':nome', ($data['nome']));
+            $sql->bindValue(':sobrenome', ($data['sobrenome']));
             $sql->bindValue(':conjuge', ($data['conjuge'] ?? ""));
-            $sql->bindValue(':area', $data['area']);
+            $sql->bindValue(':cadeira', $data['cadeira']);
+            $sql->bindValue(':area', ($data['area']));
             $sql->bindValue(':supervisor', ($data['supervisor'] ?? ""));
             $sql->bindValue(':lider', ($data['lider'] ?? ""));
             $sql->execute();
@@ -253,17 +244,21 @@ class Inscription extends Model
                 return false;
             }
 
+            $this->sendEmail();
+
             return true;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
 
-    public function sendEmail()
+    public function sendEmail($id = 0)
     {
         try {
-            if (!$this->getById(42)) {
-                return;
+            if ($id > 0) {
+                if (!$this->getById($id)) {
+                    return;
+                }
             }
 
             $inscricao = $this->getResult()['data'];
@@ -275,15 +270,140 @@ class Inscription extends Model
 
             $evento = $event->getResult()['data'];
 
-            $subject = $evento['data'] . " " . utf8_encode($evento['descricao']);
-            $body = "teste";
+            $subject = 'CGErmelino Informa';
+
+            $body = '<!DOCTYPE html
+                            PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+                        <html xmlns="http://www.w3.org/1999/xhtml">
+                        
+                        <head>
+                            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                            <title>Comunidade da Graça de Ermelino Matarazzo</title>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        </head>
+                        
+                        <body style="margin: 0; padding: 0;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"
+                                            style="border-collapse: collapse;">
+                                            <tr>
+                                                <td>
+                                                    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+                                                        <tr>
+                                                            <td align="center" style="padding: 40px 0 30px 0;">
+                                                                <img src="http://cgermelino.com.br/encontros/assets/logo.png"
+                                                                    alt="Criando Mágica de E-mail" width="300" height="auto"
+                                                                    style="display: block;" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
+                                                                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                                    <tr>
+                                                                        <td>
+                                                                            <p
+                                                                                style="color: #153643; font-family: Arial, sans-serif; font-size: 20px;">
+                                                                                É isso ai.. <strong>{{NOME_SOBRENOME}}</strong></p>
+                                                                            <p
+                                                                                style="color: #153643; font-family: Arial, sans-serif; font-size: 16px;">
+                                                                                Aguardamos você para podermos congregar juntos no dia
+                                                                                <strong>{{DATA}}</strong> para o <strong>{{EVENTO}}</strong>.
+                                                                            </p>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>ID: </strong></span>
+                                                                            {{ID}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Cadeira: </strong></span>
+                                                                            {{CADEIRA}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Email: </strong></span>
+                                                                            {{EMAIL}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Nome: </strong></span>
+                                                                            {{NOME_SOBRENOME}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Cônjuge: </strong></span>
+                                                                            {{CONJUGE}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Área: </strong></span>
+                                                                            {{AREA}}
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td bgcolor="#ee4c50" style="padding: 30px 30px 30px 30px;">
+                                                                <table cellpadding="0" cellspacing="0" width="100%">
+                                                                    <tr>
+                                                                        <td
+                                                                            style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;">
+                                                                            &reg;2020
+                                                                            <a href="http://mi7dev.com.br" style="color: #ffffff;">
+                                                                                <font color="#ffffff">MI7Dev</font>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        
+                        </html>';
+
+            $nomeSobrenome = $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
+            $body = str_replace('{{NOME_SOBRENOME}}', $nomeSobrenome, $body);
+
+            $data = explode('-', $evento['data']);
+            $data = $data[2] . '/' . $data[1] . '/' . $data[0];
+            $body = str_replace('{{DATA}}', $data, $body);
+            $body = str_replace('{{EVENTO}}', $evento['descricao'], $body);
+
+            $body = str_replace('{{ID}}',  $inscricao['id'], $body);
+            $body = str_replace('{{EMAIL}}',  $inscricao['email'], $body);
+            $body = str_replace('{{NOME_SOBRENOME}}', $nomeSobrenome, $body);
+            $body = str_replace('{{CONJUGE}}',  $inscricao['conjuge'], $body);
+            $body = str_replace('{{AREA}}',  $inscricao['area'], $body);
+            $body = str_replace('{{CADEIRA}}', $inscricao['cadeira'], $body);
+
             $to = $inscricao['email'];
             $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
 
             $mail = new Mail();
             $mail->send($subject, $body, $to, $toName);
-
-            $this->result = $mail->getResult();
 
             return true;
         } catch (Exception $e) {
@@ -305,6 +425,10 @@ class Inscription extends Model
     {
         if (empty($data['evento'])) {
             $this->result['message']['errors'][] = 'Evento não informado';
+        }
+
+        if (empty($data['cadeira'])) {
+            $this->result['message']['errors'][] = 'Cadeira não informado';
         }
 
         if (empty($data['email'])) {

@@ -81,8 +81,7 @@ class Controller
 
 	public function toJson($array)
 	{
-		header('Content-Type: application/json');
-		echo $this->converter($array);
+		echo json_encode($array);
 		exit;
 	}
 

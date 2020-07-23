@@ -147,11 +147,8 @@ class InscriptionController extends Controller
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
         if ($this->isGet()) {
-            if ($inscription->vagasValidas($chave, $data, $duplas)) {
-                $retObj = $inscription->getResult();
-            } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
-            }
+            $inscription->vagasValidas($chave, $data, $duplas);
+            $retObj = $inscription->getResult();
         } else {
             $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
         }
