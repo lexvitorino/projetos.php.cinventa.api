@@ -6,6 +6,7 @@ header("Access-Control-Allow-Headers: *");
 
 date_default_timezone_set('America/Sao_Paulo');
 
+// CONFIGRAÇÕES DO DATABASE #################
 $config = array();
 if (ENVIRONMENT == 'development') {
 	define("BASE_URL", "http://localhost/projetos/cinventa/api");
@@ -32,3 +33,14 @@ try {
 	echo "ERRO: " . $e->getMessage();
 	exit;
 }
+
+// CONFIGRAÇÕES DO EMAIL ####################
+define('EMAIL_CHARSET', 'UTF-8');
+define('EMAIL_HOST', 'mail.mi7dev.com.br');
+define('EMAIL_SMTP_AUTH', true);
+define('EMAIL_USERNAME', 'contato@mi7dev.com.br');
+define('EMAIL_PASSWORD', 'EG3VlX0fD7qD');
+define('EMAIL_SMTP_SECURE', 'ssl');
+define('EMAIL_PORT', 587);
+define('EMAIL_FROM', 'contato@mi7dev.com.br');
+define('EMAIL_FROM_NAME', 'Contato');

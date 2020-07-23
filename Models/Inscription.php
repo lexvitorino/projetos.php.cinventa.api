@@ -5,6 +5,10 @@ namespace Models;
 use Exception;
 use \Core\Model;
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+require 'vendor/autoload.php';
+
 class Inscription extends Model
 {
     private $subscriberId;
@@ -248,6 +252,38 @@ class Inscription extends Model
             if (!$this->getById($id)) {
                 return false;
             }
+
+            return true;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function sendEmail()
+    {
+        try {
+            if (!$this->getById(42)) {
+                return;
+            }
+
+            $inscricao = $this->getResult()['data'];
+
+            $event = new Event($this->subscriberId);
+            if (!$event->getByChave($inscricao['evento'], $inscricao['data'])) {
+                return;
+            }
+
+            $evento = $event->getResult()['data'];
+
+            $subject = $evento['data'] . " " . utf8_encode($evento['descricao']);
+            $body = "teste";
+            $to = $inscricao['email'];
+            $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
+
+            $mail = new Mail();
+            $mail->send($subject, $body, $to, $toName);
+
+            $this->result = $mail->getResult();
 
             return true;
         } catch (Exception $e) {

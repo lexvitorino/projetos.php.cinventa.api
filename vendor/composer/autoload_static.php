@@ -11,6 +11,11 @@ class ComposerStaticInitf410908c6c3b1468b0ab8863771f00bb
         array (
             'Repositories\\' => 13,
         ),
+        'P' => 
+        array (
+            'PHPMailer\\PHPMailer\\' => 20,
+            'PHPMailer\\' => 10,
+        ),
         'M' => 
         array (
             'Models\\' => 7,
@@ -26,6 +31,14 @@ class ComposerStaticInitf410908c6c3b1468b0ab8863771f00bb
         'Repositories\\' => 
         array (
             0 => __DIR__ . '/../..' . '/Repositories',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
+        ),
+        'PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/PHPMailer',
         ),
         'Models\\' => 
         array (
