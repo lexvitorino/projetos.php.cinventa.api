@@ -158,6 +158,32 @@ class Inscription extends Model
         }
     }
 
+    public function getByEmail(string $email, string $ativo): bool
+    {
+        try {
+            $sql = "SELECT i.* 
+                    FROM   inscriptions i
+                        INNER JOIN events e ON e.chave = i.evento 
+                    WHERE  i.email = :email
+                    AND    e.ativo = :ativo
+                    LIMIT  1";
+
+            $sql = $this->db->prepare($sql);
+            $sql->bindValue(':email', $email);
+            $sql->bindValue(':ativo', $ativo);
+            $sql->execute();
+
+            if ($sql->rowCount() > 0) {
+                $this->result['data'] = $sql->fetch();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
     public function getByEventoAndData(string $evento, string $data): bool
     {
         try {
@@ -230,10 +256,10 @@ class Inscription extends Model
             $sql->bindValue(':email', $data['email']);
             $sql->bindValue(':data', $data['data']);
             $sql->bindValue(':nome', ($data['nome']));
-            $sql->bindValue(':sobrenome', ($data['sobrenome']));
+            $sql->bindValue(':sobrenome', ($data['sobrenome'] ?? ""));
             $sql->bindValue(':conjuge', ($data['conjuge'] ?? ""));
             $sql->bindValue(':cadeira', $data['cadeira']);
-            $sql->bindValue(':area', ($data['area']));
+            $sql->bindValue(':area', ($data['area'] ?? ""));
             $sql->bindValue(':supervisor', ($data['supervisor'] ?? ""));
             $sql->bindValue(':lider', ($data['lider'] ?? ""));
             $sql->execute();
@@ -439,18 +465,14 @@ class Inscription extends Model
             $this->result['message']['errors'][] = 'Nome não informado';
         }
 
-        if (empty($data['sobrenome'])) {
-            $this->result['message']['errors'][] = 'Sobrenome não informado';
-        }
-
-        if (empty($data['area'])) {
-            $this->result['message']['errors'][] = 'Área não informada';
-        }
-
         if (count($this->result['message']['errors']) == 0) {
             if ($this->getByDataAndEmail(($data['id'] ?? 0), $data['data'], $data['email'])) {
                 $this->result['message']['errors'][] = 'Você já possui uma inscricao para esta data';
             }
+        }
+
+        if (count($this->result['message']['errors']) == 0) {
+            $this->vagasValidas($data['evento'], $data['data'], $data['cadeira']);
         }
 
         $this->result['message']['hasError'] = count($this->result['message']['errors']) > 0;

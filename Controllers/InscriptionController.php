@@ -125,6 +125,23 @@ class InscriptionController extends Controller
         $this->toJson($retObj);
     }
 
+    public function byEmail($email, $ativo)
+    {
+        $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
+
+        if ($this->isGet()) {
+            if ($inscription->getByEmail($email, $ativo)) {
+                $retObj = $inscription->getResult();
+            } else {
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+            }
+        } else {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+        }
+
+        $this->toJson($retObj);
+    }
+
     public function confirmar()
     {
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);

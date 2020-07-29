@@ -21,6 +21,7 @@ $routes['/inscription'] = '/inscription';
 $routes['/inscription/sendEmail'] = '/inscription/sendEmail';
 $routes['/inscription/byEventoAndDataAndEmail/{evento}/{data}/{email}'] = '/inscription/byEventoAndDataAndEmail/:evento/:data/:email';
 $routes['/inscription/byEventoAndData/{evento}/{data}'] = '/inscription/byEventoAndData/:evento/:data';
+$routes['/inscription/byEmail/{email}/{ativo}'] = '/inscription/byEmail/:email/:ativo';
 $routes['/inscription/create'] = '/inscription/create';
 $routes['/inscription/{id}'] = '/inscription/byId/:id';
 $routes['/inscription/confirmar'] = '/inscription/confirmar';
