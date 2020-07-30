@@ -319,7 +319,7 @@ class Inscription extends Model
                                                     <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
                                                         <tr>
                                                             <td align="center" style="padding: 40px 0 30px 0;">
-                                                                <img src="http://cgermelino.com.br/encontros/assets/logo.png"
+                                                                <img src="http://cgermelino.com.br/wp-content/uploads/2018/08/logo.png"
                                                                     alt="Criando Mágica de E-mail" width="300" height="auto"
                                                                     style="display: block;" />
                                                             </td>
@@ -363,21 +363,21 @@ class Inscription extends Model
                                                                     <tr
                                                                         style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                                                         <td>
-                                                                            <span><strong>Nome: </strong></span>
+                                                                            <span><strong>Nome completo: </strong></span>
                                                                             {{NOME_SOBRENOME}}
                                                                         </td>
                                                                     </tr>
                                                                     <tr
                                                                         style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                                                         <td>
-                                                                            <span><strong>Cônjuge: </strong></span>
+                                                                            <span><strong>Nome do seu par: </strong></span>
                                                                             {{CONJUGE}}
                                                                         </td>
                                                                     </tr>
                                                                     <tr
                                                                         style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                                                         <td>
-                                                                            <span><strong>Área: </strong></span>
+                                                                            <span><strong>Supervisor de área: </strong></span>
                                                                             {{AREA}}
                                                                         </td>
                                                                     </tr>
@@ -413,7 +413,8 @@ class Inscription extends Model
             $nomeSobrenome = $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
             $body = str_replace('{{NOME_SOBRENOME}}', $nomeSobrenome, $body);
 
-            $data = explode('-', $evento['data']);
+            $dh = explode('-', $evento['data']);
+            $data = explode('-', $dh[0]);
             $data = $data[2] . '/' . $data[1] . '/' . $data[0];
             $body = str_replace('{{DATA}}', $data, $body);
             $body = str_replace('{{EVENTO}}', $evento['descricao'], $body);
@@ -431,6 +432,10 @@ class Inscription extends Model
             $mail = new Mail();
             $mail->send($subject, $body, $to, $toName);
 
+            if ($id > 0) {
+                $this->result = $mail->getResult();
+            }
+
             return true;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
@@ -445,6 +450,32 @@ class Inscription extends Model
     public function error()
     {
         return $this->result['message'];
+    }
+
+    public function eventoAtivo(string $evento): bool
+    {
+        try {
+            $sql = "SELECT *
+                    FROM   events
+                    WHERE  chave = :evento
+                    AND    ativo = 1
+                    AND    ativo_as <= NOW() 
+                    LIMIT  1";
+
+            $sql = $this->db->prepare($sql);
+            $sql->bindValue(':evento', $evento);
+            $sql->execute();
+
+            if ($sql->rowCount() > 0) {
+                return true;
+            } else {
+                $this->result['message']['errors'][] = 'Evento não está mais disponível';
+                $this->result['message']['hasError'] = true;
+                return false;
+            }
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     private function isValid($data): bool
@@ -465,9 +496,17 @@ class Inscription extends Model
             $this->result['message']['errors'][] = 'Nome não informado';
         }
 
+        if (empty($data['area'])) {
+            $this->result['message']['errors'][] = 'Área não informado';
+        }
+
+        if (count($this->result['message']['errors']) == 0) {
+            $this->eventoAtivo($data['evento']);
+        }
+
         if (count($this->result['message']['errors']) == 0) {
             if ($this->getByDataAndEmail(($data['id'] ?? 0), $data['data'], $data['email'])) {
-                $this->result['message']['errors'][] = 'Você já possui uma inscricao para esta data';
+                $this->result['message']['errors'][] = 'Você já possui uma inscrição para esta data';
             }
         }
 

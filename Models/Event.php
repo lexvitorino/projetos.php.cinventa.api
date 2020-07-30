@@ -30,6 +30,7 @@ class Event extends Model
             $sql = "SELECT * 
                     FROM   events
                     WHERE  ativo = 1
+                    AND    ativo_as <= NOW()
                     ORDER BY data";
 
             $sql = $this->db->prepare($sql);
@@ -74,7 +75,7 @@ class Event extends Model
             $sql = "SELECT * 
                     FROM   events
                     WHERE  chave = :chave
-                    AND    data = :data";
+                    AND    DATE(data) = DATE(:data)";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':chave', $chave);
