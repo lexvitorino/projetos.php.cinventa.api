@@ -4,6 +4,7 @@ namespace Models;
 
 use Exception;
 use \Core\Model;
+use PDO;
 
 class Event extends Model
 {
@@ -37,7 +38,7 @@ class Event extends Model
             $sql->execute();
 
             if ($sql->rowCount() > 0) {
-                $this->result['data'] = $sql->fetchAll();
+                $this->result['data'] = $sql->fetchAll(PDO::FETCH_ASSOC);
                 return true;
             } else {
                 return false;
@@ -59,7 +60,7 @@ class Event extends Model
             $sql->execute();
 
             if ($sql->rowCount() > 0) {
-                $this->result['data'] = $sql->fetch();
+                $this->result['data'] = $sql->fetch(PDO::FETCH_ASSOC);
                 return true;
             } else {
                 return false;
@@ -83,7 +84,7 @@ class Event extends Model
             $sql->execute();
 
             if ($sql->rowCount() > 0) {
-                $this->result['data'] = $sql->fetch();
+                $this->result['data'] = $sql->fetch(PDO::FETCH_ASSOC);
                 return true;
             } else {
                 return false;
