@@ -28,5 +28,8 @@ $routes['/inscription/confirmar'] = '/inscription/confirmar';
 $routes['/inscription/vagasValidas/{chave}/{data}/{duplas}'] = '/inscription/vagasValidas/:chave/:data/:duplas';
 
 $routes['/event'] = '/event';
+$routes['/event/getActivosToInc'] = '/event/getActivosToInc';
+$routes['/event/proximoEvento'] = '/event/proximoEvento';
 $routes['/event/create'] = '/event/create';
+$routes['/event/active'] = '/event/active';
 $routes['/event/{id}'] = '/event/byId/:id';

@@ -6,13 +6,19 @@ use \Core\Model;
 
 class Session extends Model
 {
-    private $token;
+    private $result;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->token = "";
+        $this->result = array(
+            'message' => array(
+                'hasError' => false,
+                'errors' => array()
+            ),
+            'data' => array()
+        );
     }
 
     public function auth(string $email, string $password): bool
@@ -27,26 +33,7 @@ class Session extends Model
 
         if ($sql->rowCount() > 0) {
             $data = $sql->fetch();
-            if (password_verify($password, $data['password_hash'])) {
-
-                $data['avatar'] = array('url' => '');
-                if (!is_null($data['avatar_id']) && intVal($data['avatar_id']) > 0) {
-                    $file = new File($data['subscriber_id']);
-                    if ($file->getById($data['avatar_id'])) {
-                        $data['avatar'] = array(
-                            'url' => $file->single()['url'],
-                        );
-                    }
-                }
-
-                $data['subscriber_email'] = '';
-                if (!is_null($data['subscriber_id']) && intVal($data['subscriber_id']) > 0) {
-                    $subscriber = new Subscriber();
-                    if ($file->getById($data['subscriber_id'])) {
-                        $data['subscriber_email'] = $subscriber->single()['email'];
-                    }
-                }
-
+            if (password_verify($password, $data['password'])) {
                 $this->createJwt($data);
                 return true;
             }
@@ -54,6 +41,16 @@ class Session extends Model
         } else {
             return false;
         }
+    }
+
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    public function error()
+    {
+        return $this->result['message'];
     }
 
     public function getToken(): string
@@ -88,13 +85,9 @@ class Session extends Model
         $header = json_encode(array("typ" => "JWT", "alg" => "HS256"));
 
         $payload = json_encode(array(
-            "subscriberId" => intVal($user["subscriber_id"]),
-            "subscriberEmail" => $user["subscriber_email"],
             "userId" => intVal($user['id']),
             "userName" => $user["name"],
             "userEmail" => $user["email"],
-            "userAvatar" => $user["avatar"],
-            "userPermission" => $user["permission"],
             "iat" => strtotime("+{$config['jwt_valid_per']} days"),
             "exp" => strtotime("+{$config['jwt_valid_per']} days")
         ));
@@ -107,7 +100,7 @@ class Session extends Model
 
         $jwt = $hbase . "." . $pbase . "." . $bsig;
 
-        $this->token = $jwt;
+        $this->result['data']['token'] = $jwt;
     }
 
     private static function base64url_encode($data)

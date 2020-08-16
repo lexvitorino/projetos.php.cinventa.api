@@ -248,9 +248,9 @@ class Inscription extends Model
             }
 
             $sql = "INSERT INTO inscriptions
-                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge, cadeira)
+                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge, cadeira, idade)
                     VALUES 
-                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge, :cadeira)";
+                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge, :cadeira, :idade)";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':evento', $data['evento']);
@@ -263,6 +263,7 @@ class Inscription extends Model
             $sql->bindValue(':area', ($data['area'] ?? ""));
             $sql->bindValue(':supervisor', ($data['supervisor'] ?? ""));
             $sql->bindValue(':lider', ($data['lider'] ?? ""));
+            $sql->bindValue(':idade', ($data['idade'] ?? 0));
             $sql->execute();
 
             $id = $this->db->lastInsertId();
@@ -414,8 +415,7 @@ class Inscription extends Model
             $nomeSobrenome = $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
             $body = str_replace('{{NOME_SOBRENOME}}', $nomeSobrenome, $body);
 
-            $dh = explode('-', $evento['data']);
-            $data = explode('-', $dh[0]);
+            $data = explode('-', $evento['data']);
             $data = $data[2] . '/' . $data[1] . '/' . $data[0];
             $body = str_replace('{{DATA}}', $data, $body);
             $body = str_replace('{{EVENTO}}', $evento['descricao'], $body);
@@ -483,10 +483,6 @@ class Inscription extends Model
     {
         if (empty($data['evento'])) {
             $this->result['message']['errors'][] = 'Evento não informado';
-        }
-
-        if (empty($data['cadeira'])) {
-            $this->result['message']['errors'][] = 'Cadeira não informado';
         }
 
         if (empty($data['email'])) {

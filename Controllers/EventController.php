@@ -27,6 +27,46 @@ class EventController extends Controller
         $this->toJson($retObj);
     }
 
+    public function getActivosToInc()
+    {
+        $retObj = array(
+            'message' => array(
+                'hasError' => false,
+                'errors' => array()
+            ),
+        );
+
+        if ($this->isGet()) {
+            $event = new Event($this->dataToken["subscriberId"] ?? 0);
+            $event->getActivosToInc();
+            $retObj = $event->getResult();
+        } else {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+        }
+
+        $this->toJson($retObj);
+    }
+
+    public function proximoEvento()
+    {
+        $retObj = array(
+            'message' => array(
+                'hasError' => false,
+                'errors' => array()
+            ),
+        );
+
+        if ($this->isGet()) {
+            $event = new Event($this->dataToken["subscriberId"] ?? 0);
+            $event->proximoEvento();
+            $retObj = $event->getResult();
+        } else {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+        }
+
+        $this->toJson($retObj);
+    }
+
     public function create()
     {
         $retObj = array(
@@ -103,6 +143,7 @@ class EventController extends Controller
     {
         $event = new Event($this->dataToken["subscriberId"] ?? 0);
 
+        $event->delete($id);
         $retObj = $event->getResult();
 
         $this->toJson($retObj);
@@ -117,5 +158,15 @@ class EventController extends Controller
             die;
         }
         return $isLogged;
+    }
+
+    public function active($id)
+    {
+        $event = new Event($this->dataToken["subscriberId"] ?? 0);
+
+        $event->active($id);
+        $retObj = $event->getResult();
+
+        $this->toJson($retObj);
     }
 }

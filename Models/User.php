@@ -206,16 +206,16 @@ class User extends Model
             }
 
             $sql = "INSERT INTO users
-                    (subscriber_Id, name, email, permission, avatar_id, created_at, updated_at)
+                    (subscriber_Id, enable, name, email, password)
                     VALUES 
-                    (:subscriberId, :name, :email, :permission, :avatar_id, NOW(), NOW() )";
+                    (:subscriberId, :enable, :name, :email, :password )";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':subscriberId', $this->subscriberId);
+            $sql->bindValue(':enable', $data['enable']);
             $sql->bindValue(':name', $data['name']);
             $sql->bindValue(':email', $data['email']);
-            $sql->bindValue(':permission', $data['permission']);
-            $sql->bindValue(':avatar_id', $data['avatar_id']);
+            $sql->bindValue(':password', password_hash($data['password'], PASSWORD_BCRYPT));
             $sql->execute();
 
             $id = $this->db->lastInsertId();
