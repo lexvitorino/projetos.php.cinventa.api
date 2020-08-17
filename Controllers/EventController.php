@@ -76,12 +76,14 @@ class EventController extends Controller
             ),
         );
 
-        if ($this->isPost()) {
-            $event = new Event($this->dataToken["subscriberId"] ?? 0);
-            $event->create($this->data());
-            $retObj = $event->getResult();
-        } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+        if ($this->isValid()) {
+            if ($this->isPost()) {
+                $event = new Event($this->dataToken["subscriberId"] ?? 0);
+                $event->create($this->data());
+                $retObj = $event->getResult();
+            } else {
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            }
         }
 
         $this->toJson($retObj);
