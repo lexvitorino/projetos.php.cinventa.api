@@ -50,3 +50,9 @@ define('EMAIL_SMTP_SECURE', 'ssl');
 define('EMAIL_PORT', 587);
 define('EMAIL_FROM', 'contato@mi7dev.com.br');
 define('EMAIL_FROM_NAME', 'Contato');
+
+
+// SESSAO PARA REQUISICAO
+define('SESSION_CONTROL_REQUEST', 0);
+define('SESSION_QTDE', 1);
+define('SESSION_SECOND', 60);

@@ -28,7 +28,7 @@ class Event extends Model
     public function proximoEvento(): bool
     {
         try {
-            $sql = "select x.ativo_as as proxEvento FROM events x WHERE x.ativo_as > NOW() ORDER BY x.ativo_as LIMIT 1";
+            $sql = "select x.descricao, x.ativo_as as proxEvento FROM events x WHERE x.ativo_as > NOW() ORDER BY x.ativo_as LIMIT 1";
 
             $sql = $this->db->prepare($sql);
             $sql->execute();
@@ -50,14 +50,16 @@ class Event extends Model
             $sql = "SELECT X.* FROM (
                         SELECT e.*,
                             (e.Dupla - ( SELECT COUNT(*) FROM inscriptions i WHERE i.evento = e.chave AND i.data = e.data AND i.cadeira = 'Dupla' )) as dispDupla, 
-                            (e.Simples - ( SELECT COUNT(*) FROM inscriptions i WHERE i.evento = e.chave AND i.data = e.data AND i.cadeira = 'Simples' )) as dispSimples
+                            (e.Simples - ( SELECT COUNT(*) FROM inscriptions i WHERE i.evento = e.chave AND i.data = e.data AND i.cadeira = 'Simples' )) as dispSimples, 
+                            (e.Tripla - ( SELECT COUNT(*) FROM inscriptions i WHERE i.evento = e.chave AND i.data = e.data AND i.cadeira = 'Tripla' )) as dispTripla, 
+                            (e.Quadrupla - ( SELECT COUNT(*) FROM inscriptions i WHERE i.evento = e.chave AND i.data = e.data AND i.cadeira = 'Quadrupla' )) as dispQuadrupla
                         FROM   events e
                         WHERE  e.ativo = 1
                         AND    e.ativo_as <= NOW()
                         AND    e.inativo_as > NOW()
                         ORDER BY e.data
                     ) AS X 
-                    WHERE X.dispDupla > 0 || X.dispSimples > 0";
+                    WHERE X.dispQuadrupla > 0 || X.dispTripla > 0 || X.dispDupla > 0 || X.dispSimples > 0";
 
             $sql = $this->db->prepare($sql);
             $sql->execute();
@@ -112,11 +114,14 @@ class Event extends Model
         $format = explode(' ', $data);
         $formatData = explode('/', $format[0]);
         $formatHora = count($format) > 1 ? $format[1] : '';
+
         if (!checkdate($formatData[1], $formatData[0], $formatData[2])) :
             return false;
         else :
-            if (empty($formatHora)) :
+            if (!empty($formatHora)) :
                 $format[1] = date('H:i:s');
+            else :
+                $formatHora = "00:00";
             endif;
             $dormat = $formatData[2] . '-' . $formatData[1] . '-' . $formatData[0] . ' ' . substr($formatHora, 0, 5) . ':00';
             return $dormat;
@@ -262,9 +267,14 @@ class Event extends Model
                            descricao = :descricao, 
                            simples = :simples, 
                            dupla = :dupla, 
+                           quadrupla = :quadrupla, 
+                           tripla = :tripla, 
                            ativo_as = :ativo_as, 
                            inativo_as = :inativo_as,
-                           sol_idade = :sol_idade
+                           sol_idade = :sol_idade,
+                           sol_periodo = :sol_periodo,
+                           periodos = :periodos,
+                           criancas_de = :criancas_de
                     WHERE  id = :id";
 
             $sql = $this->db->prepare($sql);
@@ -274,10 +284,15 @@ class Event extends Model
             $sql->bindValue(':chave', $data['chave']);
             $sql->bindValue(':descricao', $data['descricao']);
             $sql->bindValue(':simples', ($data['simples'] ?? 0));
+            $sql->bindValue(':quadrupla', ($data['quadrupla'] ?? 0));
+            $sql->bindValue(':tripla', ($data['tripla'] ?? 0));
             $sql->bindValue(':dupla', ($data['dupla'] ?? 0));
             $sql->bindValue(':sol_idade', ($data['sol_idade'] ?? 0));
+            $sql->bindValue(':sol_periodo', ($data['sol_periodo'] ?? 0));
             $sql->bindValue(':ativo_as', $data['ativo_as']);
             $sql->bindValue(':inativo_as', $data['inativo_as']);
+            $sql->bindValue(':periodos', $data['periodos'] ?? 0);
+            $sql->bindValue(':criancas_de', $data['criancas_de'] ?? "");
             $sql->execute();
 
             if (!$this->getById($id)) {
@@ -304,9 +319,9 @@ class Event extends Model
             }
 
             $sql = "INSERT INTO events
-                    (ativo, data, chave, descricao, simples, dupla, sol_idade, ativo_as, inativo_as)
+                    (ativo, data, chave, descricao, simples, dupla, tripla, quadrupla, sol_idade, ativo_as, inativo_as, sol_periodo, periodos, criancas_de)
                     VALUES 
-                    (1, :data, :chave, :descricao, :simples, :dupla, :sol_idade, :ativo_as, :inativo_as)";
+                    (1, :data, :chave, :descricao, :simples, :dupla, :tripla, :quadrupla, :sol_idade, :ativo_as, :inativo_as, :sol_periodo, :periodos, :criancas_de)";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':data', $data['data']);
@@ -314,9 +329,14 @@ class Event extends Model
             $sql->bindValue(':descricao', $data['descricao']);
             $sql->bindValue(':simples', ($data['simples'] ?? 0));
             $sql->bindValue(':dupla', ($data['dupla'] ?? 0));
+            $sql->bindValue(':tripla', ($data['tripla'] ?? 0));
+            $sql->bindValue(':quadrupla', ($data['quadrupla'] ?? 0));
             $sql->bindValue(':sol_idade', ($data['sol_idade'] ?? 0));
+            $sql->bindValue(':sol_periodo', ($data['sol_periodo'] ?? 0));
             $sql->bindValue(':ativo_as', $this->Data($data['ativoAsFmt']));
             $sql->bindValue(':inativo_as', $this->Data($data['inativoAsFmt']));
+            $sql->bindValue(':periodos', ($data['periodos'] ?? ""));
+            $sql->bindValue(':criancas_de', ($data['criancas_de'] ?? ""));
             $sql->execute();
 
             $id = $this->db->lastInsertId();

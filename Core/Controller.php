@@ -76,6 +76,8 @@ class Controller
 				}
 				return (array) $data;
 				break;
+			default:
+				break;
 		}
 	}
 

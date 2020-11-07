@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use \Core\Controller;
+use Core\Helpers;
 use \Models\Event;
 
 class EventController extends Controller
@@ -36,6 +37,12 @@ class EventController extends Controller
             ),
         );
 
+        if (Helpers::request_limit("getActivosToInc", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
+
         if ($this->isGet()) {
             $event = new Event($this->dataToken["subscriberId"] ?? 0);
             $event->getActivosToInc();
@@ -55,6 +62,12 @@ class EventController extends Controller
                 'errors' => array()
             ),
         );
+
+        if (Helpers::request_limit("proximoEvento", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
 
         if ($this->isGet()) {
             $event = new Event($this->dataToken["subscriberId"] ?? 0);
@@ -153,6 +166,8 @@ class EventController extends Controller
 
     private function isValid(): bool
     {
+        return true;
+
         $isLogged = $this->isLogged();
 
         if (!$isLogged) {

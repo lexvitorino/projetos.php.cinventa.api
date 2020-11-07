@@ -87,13 +87,24 @@ class Inscription extends Model
                 if ($sql->rowCount() > 0) {
                     $res = $sql->fetch(PDO::FETCH_ASSOC);
 
+                    $limite = 0;
+                    if ($cadeira == "Simples") {
+                        $limite = intval($event->getResult()['data']['simples']);
+                    } else if ($cadeira == "Dupla") {
+                        $limite = intval($event->getResult()['data']['dupla']);
+                    } else if ($cadeira == "Tripla") {
+                        $limite = intval($event->getResult()['data']['tripla']);
+                    } else if ($cadeira == "Quadrupla") {
+                        $limite = intval($event->getResult()['data']['quadrupla']);
+                    }
+
                     $this->result['data'] = array(
                         'inscricoes' => intval($res['QT']),
-                        'limite' => $cadeira == "Dupla" ? intval($event->getResult()['data']['dupla']) : intval($event->getResult()['data']['simples']),
+                        'limite' => $limite,
                     );
 
-                    if (intval($this->result['data']['inscricoes']) >= intval($this->result['data']['limite'])) {
-                        $this->result['message']['errors'][] = 'Todas as ' . $this->result['data']['limite'] . ' vagas destinadas as cadeiras ' . ($cadeira == "Dupla" ? 'duplas' : 'simples') . ' foram preenchidas';
+                    if (intval($this->result['data']['inscricoes']) >= $limite) {
+                        $this->result['message']['errors'][] = 'Todas as ' . $limite . ' vagas destinadas as cadeiras ' . $cadeira . ' foram preenchidas';
                         $this->result['message']['hasError'] = true;
                     }
 
@@ -107,18 +118,20 @@ class Inscription extends Model
         }
     }
 
-    public function getByDataAndEmail(int $id, string $data, string $email): bool
+    public function buscaEmailCadastradoParaOMesmoPeriodo(int $id, string $data, string $periodo, string $email): bool
     {
         try {
             $sql = "SELECT * 
                     FROM   inscriptions
                     WHERE  id <> :id
                     AND    data = :data
+                    AND    periodo = :periodo
                     AND    email = :email";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':id', $id);
             $sql->bindValue(':data', $data);
+            $sql->bindValue(':periodo', $periodo);
             $sql->bindValue(':email', $email);
             $sql->execute();
 
@@ -133,19 +146,21 @@ class Inscription extends Model
         }
     }
 
-    public function getByEventoAndDataAndEmail(string $evento, string $data, string $email): bool
+    public function buscaEmailCadastradoPeriodo(string $evento, string $data, string $periodo, string $email): bool
     {
         try {
             $sql = "SELECT * 
                     FROM   inscriptions
                     WHERE  evento = :evento
                     AND    data = :data
-                    AND    email = :email";
+                    AND    email = :email
+                    AND    periodo = :periodo";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':evento', $evento);
             $sql->bindValue(':data', $data);
             $sql->bindValue(':email', $email);
+            $sql->bindValue(':periodo', $periodo ?? "UNICO");
             $sql->execute();
 
             if ($sql->rowCount() > 0) {
@@ -243,14 +258,15 @@ class Inscription extends Model
     public function create($data): bool
     {
         try {
+
             if (!$this->isValid($data)) {
                 return false;
             }
 
             $sql = "INSERT INTO inscriptions
-                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge, cadeira, idade)
+                    (evento, data, email, nome, sobrenome, area, supervisor, lider, conjuge, cadeira, idade, acompanhante3, acompanhante4, periodo)
                     VALUES 
-                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge, :cadeira, :idade)";
+                    (:evento, :data, :email, :nome, :sobrenome, :area, :supervisor, :lider, :conjuge, :cadeira, :idade, :acompanhante3, :acompanhante4, :periodo)";
 
             $sql = $this->db->prepare($sql);
             $sql->bindValue(':evento', $data['evento']);
@@ -258,12 +274,15 @@ class Inscription extends Model
             $sql->bindValue(':data', $data['data']);
             $sql->bindValue(':nome', ($data['nome']));
             $sql->bindValue(':sobrenome', ($data['sobrenome'] ?? ""));
-            $sql->bindValue(':conjuge', ($data['conjuge'] ?? ""));
+            $sql->bindValue(':conjuge', ($data['cadeira'] == 'Simples' ? "" : ($data['conjuge'] ?? "")));
             $sql->bindValue(':cadeira', $data['cadeira']);
+            $sql->bindValue(':acompanhante3', $data['acompanhante3'] ?? "");
+            $sql->bindValue(':acompanhante4', $data['acompanhante4'] ?? "");
             $sql->bindValue(':area', ($data['area'] ?? ""));
             $sql->bindValue(':supervisor', ($data['supervisor'] ?? ""));
             $sql->bindValue(':lider', ($data['lider'] ?? ""));
             $sql->bindValue(':idade', ($data['idade'] ?? 0));
+            $sql->bindValue(':periodo', ($data['periodo'] ?? 0));
             $sql->execute();
 
             $id = $this->db->lastInsertId();
@@ -272,7 +291,7 @@ class Inscription extends Model
                 return false;
             }
 
-            $this->sendEmail();
+            // $this->sendEmail();
 
             return true;
         } catch (Exception $e) {
@@ -358,6 +377,13 @@ class Inscription extends Model
                                                                     <tr
                                                                         style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                                                         <td>
+                                                                            <span><strong>Período: </strong></span>
+                                                                            {{PERIODO}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
                                                                             <span><strong>Email: </strong></span>
                                                                             {{EMAIL}}
                                                                         </td>
@@ -374,6 +400,20 @@ class Inscription extends Model
                                                                         <td>
                                                                             <span><strong>Nome do seu par: </strong></span>
                                                                             {{CONJUGE}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                        <span><strong>Nome do terceiro acompanhante: </strong></span>
+                                                                        {{ACOMPANHANTE3}}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr
+                                                                        style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                                                        <td>
+                                                                            <span><strong>Nome do quarto acompanhante: </strong></span>
+                                                                            {{ACOMPANHANTE4}}
                                                                         </td>
                                                                     </tr>
                                                                     <tr
@@ -423,9 +463,12 @@ class Inscription extends Model
             $body = str_replace('{{ID}}',  $inscricao['id'], $body);
             $body = str_replace('{{EMAIL}}',  $inscricao['email'], $body);
             $body = str_replace('{{NOME_SOBRENOME}}', $nomeSobrenome, $body);
-            $body = str_replace('{{CONJUGE}}',  $inscricao['conjuge'], $body);
+            $body = str_replace('{{CONJUGE}}',  $inscricao['conjuge'] ?? "", $body);
+            $body = str_replace('{{ACOMPANHANTE3}}',  $inscricao['acompanhante3'] ?? "", $body);
+            $body = str_replace('{{ACOMPANHANTE4}}',  $inscricao['acompanhante4'] ?? "", $body);
             $body = str_replace('{{AREA}}',  $inscricao['area'], $body);
             $body = str_replace('{{CADEIRA}}', $inscricao['cadeira'], $body);
+            $body = str_replace('{{PERIODO}}', $inscricao['periodo'], $body);
 
             $to = $inscricao['email'];
             $toName = $inscricao['nome'] . " " . $inscricao['sobrenome'];
@@ -493,6 +536,10 @@ class Inscription extends Model
             $this->result['message']['errors'][] = 'Nome não informado';
         }
 
+        if (empty($data['sobrenome'])) {
+            $this->result['message']['errors'][] = 'Sobrenome não informado';
+        }
+
         if (empty($data['area'])) {
             $this->result['message']['errors'][] = 'Área não informado';
         }
@@ -502,8 +549,8 @@ class Inscription extends Model
         }
 
         if (count($this->result['message']['errors']) == 0) {
-            if ($this->getByDataAndEmail(($data['id'] ?? 0), $data['data'], $data['email'])) {
-                $this->result['message']['errors'][] = 'Você já possui uma inscrição para esta data';
+            if ($this->buscaEmailCadastradoParaOMesmoPeriodo(($data['id'] ?? 0), $data['data'], ($data['periodo'] ?? "UNIQUE"), $data['email'])) {
+                $this->result['message']['errors'][] = 'Você já possui uma inscrição para este período';
             }
         }
 

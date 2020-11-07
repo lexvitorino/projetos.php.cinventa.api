@@ -18,7 +18,7 @@ $routes['/subscriber/create'] = '/subscriber/create';
 $routes['/subscriber/{id}'] = '/subscriber/byId/:id';
 
 $routes['/inscription'] = '/inscription';
-$routes['/inscription/sendEmail'] = '/inscription/sendEmail';
+$routes['/inscription/sendEmail/{id}'] = '/inscription/sendEmail/:id';
 $routes['/inscription/byEventoAndDataAndEmail/{evento}/{data}/{email}'] = '/inscription/byEventoAndDataAndEmail/:evento/:data/:email';
 $routes['/inscription/byEventoAndData/{evento}/{data}'] = '/inscription/byEventoAndData/:evento/:data';
 $routes['/inscription/byEmail/{email}/{ativo}'] = '/inscription/byEmail/:email/:ativo';

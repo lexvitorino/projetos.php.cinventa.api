@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use \Core\Controller;
+use Core\Helpers;
 use \Models\Inscription;
 
 class InscriptionController extends Controller
@@ -51,6 +52,12 @@ class InscriptionController extends Controller
             ),
         );
 
+        if (Helpers::request_limit("create", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
+
         if ($this->isPost()) {
             $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
             $inscription->create($this->data());
@@ -64,13 +71,6 @@ class InscriptionController extends Controller
 
     public function byId($id)
     {
-        $retObj = array(
-            'message' => array(
-                'hasError' => false,
-                'errors' => array()
-            ),
-        );
-
         if ($this->isValid()) {
             switch ($this->method()) {
                 case 'GET':
@@ -91,12 +91,18 @@ class InscriptionController extends Controller
         $this->toJson($retObj);
     }
 
-    public function byEventoAndDataAndEmail($evento, $data, $email)
+    public function byEventoAndDataAndEmail($evento, $data, $periodo, $email)
     {
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
+        if (Helpers::request_limit("byEventoAndDataAndEmail", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
+
         if ($this->isGet()) {
-            if ($inscription->getByEventoAndDataAndEmail($evento, $data, $email)) {
+            if ($inscription->buscaEmailCadastradoParaPeriodo($evento, $data, $periodo, $email)) {
                 $retObj = $inscription->getResult();
             } else {
                 $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
@@ -111,6 +117,12 @@ class InscriptionController extends Controller
     public function byEventoAndData($evento, $data)
     {
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
+
+        if (Helpers::request_limit("byEventoAndData", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
 
         if ($this->isGet()) {
             if ($inscription->getByEventoAndData($evento, $data)) {
@@ -128,6 +140,12 @@ class InscriptionController extends Controller
     public function byEmail($email, $ativo)
     {
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
+
+        if (Helpers::request_limit("byEmail", SESSION_QTDE, SESSION_SECOND)) {
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $this->toJson($retObj);
+            return;
+        }
 
         if ($this->isGet()) {
             if ($inscription->getByEmail($email, $ativo)) {
@@ -173,12 +191,12 @@ class InscriptionController extends Controller
         $this->toJson($retObj);
     }
 
-    public function sendEmail()
+    public function sendEmail($id)
     {
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
         if ($this->isGet()) {
-            if ($inscription->sendEmail()) {
+            if ($inscription->sendEmail($id)) {
                 $retObj = $inscription->getResult();
             }
         } else {
