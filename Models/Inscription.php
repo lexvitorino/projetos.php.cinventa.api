@@ -282,7 +282,7 @@ class Inscription extends Model
             $sql->bindValue(':supervisor', ($data['supervisor'] ?? ""));
             $sql->bindValue(':lider', ($data['lider'] ?? ""));
             $sql->bindValue(':idade', ($data['idade'] ?? 0));
-            $sql->bindValue(':periodo', ($data['periodo'] ?? 0));
+            $sql->bindValue(':periodo', ($data['periodo'] ?? "UNICO"));
             $sql->execute();
 
             $id = $this->db->lastInsertId();

@@ -33,3 +33,6 @@ $routes['/event/proximoEvento'] = '/event/proximoEvento';
 $routes['/event/create'] = '/event/create';
 $routes['/event/active'] = '/event/active';
 $routes['/event/{id}'] = '/event/byId/:id';
+
+$routes['/children/create'] = '/children/create';
+$routes['/children/byEventoAndData/{evento}/{data}'] = '/children/byEventoAndData/:evento/:data';

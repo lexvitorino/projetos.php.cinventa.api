@@ -102,7 +102,7 @@ class InscriptionController extends Controller
         }
 
         if ($this->isGet()) {
-            if ($inscription->buscaEmailCadastradoParaPeriodo($evento, $data, $periodo, $email)) {
+            if ($inscription->buscaEmailCadastradoPeriodo($evento, $data, $periodo, $email)) {
                 $retObj = $inscription->getResult();
             } else {
                 $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
@@ -246,6 +246,7 @@ class InscriptionController extends Controller
             $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('Acesso negado'))));
             die;
         }
+
         return $isLogged;
     }
 }

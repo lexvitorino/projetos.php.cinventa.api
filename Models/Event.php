@@ -192,6 +192,7 @@ class Event extends Model
 
             if ($sql->rowCount() > 0) {
                 $this->result['data'] = $sql->fetch(PDO::FETCH_ASSOC);
+
                 return true;
             } else {
                 return false;
