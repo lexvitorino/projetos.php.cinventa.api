@@ -13,7 +13,10 @@ class ChildrenController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ""
+                )
             ),
         );
 
@@ -25,7 +28,7 @@ class ChildrenController extends Controller
         $children = new Children($this->dataToken["subscriberId"] ?? 0);
 
         if (Helpers::request_limit("byEventoAndData", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -34,10 +37,10 @@ class ChildrenController extends Controller
             if ($children->getByEventoAndData($evento, $data)) {
                 $retObj = $children->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -58,7 +61,7 @@ class ChildrenController extends Controller
                 $children->create($this->data());
                 $retObj = $children->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
             }
         }
 
@@ -70,7 +73,10 @@ class ChildrenController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ""
+                )
             ),
         );
 
@@ -86,7 +92,7 @@ class ChildrenController extends Controller
                     $retObj = $this->delete($id);
                     break;
                 default:
-                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
                     break;
             }
         }
@@ -101,7 +107,7 @@ class ChildrenController extends Controller
         if ($children->getById($id)) {
             $retObj = $children->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
         }
 
         $this->toJson($retObj);

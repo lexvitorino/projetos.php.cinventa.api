@@ -106,7 +106,7 @@ class User extends Model
         try {
             if (!$this->getById($id)) {
                 $this->result['message']['hasError'] = true;
-                $this->result['message']['errors'][] = "Usuário não cadastrado";
+                $this->result['message']['errors'][] = array('show' => false, 'value' => "Usuário não cadastrado");
                 return false;
             }
 
@@ -115,7 +115,7 @@ class User extends Model
                 $file = new File($this->subscriberId);
                 if (!$file->delete($data['avatar_id'], $data['avatar'])) {
                     $this->resul['message']['hasError'] = true;
-                    $this->resul['message']['errors'][] = 'Falha ao remover imagem';
+                    $this->resul['message']['errors'][] = array('show' => false, 'value' => 'Falha ao remover imagem');
                     return false;
                 }
             }
@@ -141,7 +141,7 @@ class User extends Model
         try {
             if (!$this->getById($id)) {
                 $this->result['message']['hasError'] = true;
-                $this->result['message']['errors'][] = "Usuário não cadastrado";
+                $this->result['message']['errors'][] = array('show' => false, 'value' => "Usuário não cadastrado");
                 return false;
             }
 
@@ -243,17 +243,17 @@ class User extends Model
     private function isValid($data): bool
     {
         if (empty($data['email'])) {
-            $this->result['message']['errors'][] = 'E-mail não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'E-mail não informado');
         }
 
         if (!empty($data['email'])) {
             if ($this->getByEmail(($data['id'] ?? 0), $data['email'])) {
-                $this->result['message']['errors'][] = 'E-mail já cadastro';
+                $this->result['message']['errors'][] = array('show' => false, 'value' => 'E-mail já cadastro');
             }
         }
 
         if (empty($data['name'])) {
-            $this->result['message']['errors'][] = 'Name não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Name não informado');
         }
 
         $this->result['message']['hasError'] = count($this->result['message']['errors']) > 0;

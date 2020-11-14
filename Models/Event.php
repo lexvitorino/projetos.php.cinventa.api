@@ -256,7 +256,7 @@ class Event extends Model
             }
 
             if (!(intval($data['id']) > 0)) {
-                $this->result['message']['errors'][] = 'ID não informado';
+                $this->result['message']['errors'][] = array('show' => false, 'value' => 'ID não informado');
                 $this->result['message']['hasError'] = true;
                 return false;
             }
@@ -365,15 +365,15 @@ class Event extends Model
     private function isValid($data): bool
     {
         if (empty($data['data'])) {
-            $this->result['message']['errors'][] = 'Data não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Data não informado');
         }
 
         if (empty($data['chave'])) {
-            $this->result['message']['errors'][] = 'Chave não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Chave não informado');
         }
 
         if (empty($data['descricao'])) {
-            $this->result['message']['errors'][] = 'Descricao não informada';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Descricao não informada');
         }
 
         $this->result['message']['hasError'] = count($this->result['message']['errors']) > 0;

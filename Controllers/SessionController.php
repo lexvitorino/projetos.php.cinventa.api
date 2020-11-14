@@ -18,7 +18,10 @@ class SessionController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -28,13 +31,13 @@ class SessionController extends Controller
                 if ($session->auth($this->data()['email'], $this->data()['password'])) {
                     $retObj = $session->getResult();
                 } else {
-                    $this->toJson(array('hasError' => true, 'errors' => array('Acesso negado')));
+                    $this->toJson(array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Acesso negado')));
                 }
             } else {
-                $retObj = array('hasError' => true, 'errors' => array('E-mail e/ou senha não preenchido.'));
+                $retObj = array('hasError' => true, 'errors' => array('show' => false, 'value' => 'E-mail e/ou senha não preenchido.'));
             }
         } else {
-            $retObj = array('hasError' => true, 'errors' => array('Método de requisição incompatível'));
+            $retObj = array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método de requisição incompatível'));
         }
 
         $this->toJson($retObj);
@@ -45,7 +48,10 @@ class SessionController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -54,7 +60,7 @@ class SessionController extends Controller
             $user->create($this->data());
             $retObj = $user->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);

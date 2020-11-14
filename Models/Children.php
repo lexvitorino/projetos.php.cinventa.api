@@ -165,19 +165,19 @@ class Children extends Model
     private function isValid($data): bool
     {
         if (empty($data['evento'])) {
-            $this->result['message']['errors'][] = 'Evento não informado';
+            $this->result['message']['errors'][] = array('show' => true, 'value' => 'Evento não informado');
         }
 
         if (empty($data['responsavel'])) {
-            $this->result['message']['errors'][] = 'Responsável não informado';
+            $this->result['message']['errors'][] = array('show' => true, 'value' => 'Responsável não informado');
         }
 
         if (empty($data['email'])) {
-            $this->result['message']['errors'][] = 'E-mail não informado';
+            $this->result['message']['errors'][] = array('show' => true, 'value' => 'E-mail não informado');
         } else {
             $inscription = new Inscription($this->subscriberId);
             if (!$inscription->buscaEmailCadastradoPeriodo($data['evento'], $data['data'], $data['periodo'] ?? "UNICO", $data['email'])) {
-                $this->result['message']['errors'][] = "O responsável {$data['responsavel']} com o email {$data['email']} não foi cadastrado para este evento";
+                $this->result['message']['errors'][] = array('show' => false, 'value' => "O responsável {$data['responsavel']} com o email {$data['email']} não foi cadastrado para este evento");
             }
         }
 
@@ -199,7 +199,7 @@ class Children extends Model
 
         if (count($this->result['message']['errors']) == 0) {
             if ($this->buscaEmailCadastradoParaOMesmoPeriodo(0, $data['data'], ($data['periodo'] ?? "UNICO"), $data['email'])) {
-                $this->result['message']['errors'][] = 'Você já possui uma inscrição para este período';
+                $this->result['message']['errors'][] = array('show' => false, 'value' => 'Você já possui uma inscrição para este período');
             }
         }
 
@@ -210,16 +210,16 @@ class Children extends Model
     private function childrenIdValid($num, $children, $old, $nameIsRequired = false)
     {
         if ($nameIsRequired && empty($children)) {
-            $this->result['message']['errors'][] = "Criança ({$num}) não informado";
+            $this->result['message']['errors'][] = array('show' => true, 'value' => "Criança ({$num}) não informado");
         }
 
         if (!empty($children)) {
             if (empty($old) || $old == 0) {
-                $this->result['message']['errors'][] = "Idade Criança ({$num}) não informado";
+                $this->result['message']['errors'][] = array('show' => true, 'value' => "Idade Criança ({$num}) não informado");
             }
 
             if (Count(explode(' ', $children)) < 2) {
-                $this->result['message']['errors'][] = "Por favor, para Nome Criança ({$num}) preencha pelo menos Nome e Sobrenome";
+                $this->result['message']['errors'][] = array('show' => true, 'value' => "Por favor, para Nome Criança ({$num}) preencha pelo menos Nome e Sobrenome");
             }
         }
     }
@@ -234,7 +234,7 @@ class Children extends Model
             $min = min($idades);
 
             if ($old < $min || $old > $max) {
-                $this->result['message']['errors'][] = "Idade Criança ({$num}) não permitida para o evento informado";
+                $this->result['message']['errors'][] = array('show' => true, 'value' => "Idade Criança ({$num}) não permitida para o evento informado");
             }
         }
     }

@@ -46,7 +46,7 @@ class Mail
             $mail->send();
             return true;
         } catch (Exception $e) {
-            $this->result['message']['errors'][] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            $this->result['message']['errors'][] = array('show' => false, 'value' => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
             $this->result['message']['hasError'] = true;
             return false;
         }

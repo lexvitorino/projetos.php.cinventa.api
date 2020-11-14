@@ -13,7 +13,10 @@ class InscriptionController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -25,7 +28,10 @@ class InscriptionController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -36,7 +42,7 @@ class InscriptionController extends Controller
                     $retObj = $inscription->getResult();
                 }
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
             }
         }
 
@@ -48,12 +54,15 @@ class InscriptionController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
         if (Helpers::request_limit("create", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -63,7 +72,7 @@ class InscriptionController extends Controller
             $inscription->create($this->data());
             $retObj = $inscription->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -83,7 +92,7 @@ class InscriptionController extends Controller
                     $retObj = $this->delete($id);
                     break;
                 default:
-                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
                     break;
             }
         }
@@ -96,7 +105,7 @@ class InscriptionController extends Controller
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
         if (Helpers::request_limit("byEventoAndDataAndEmail", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -105,10 +114,10 @@ class InscriptionController extends Controller
             if ($inscription->buscaEmailCadastradoPeriodo($evento, $data, $periodo, $email)) {
                 $retObj = $inscription->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -119,7 +128,7 @@ class InscriptionController extends Controller
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
         if (Helpers::request_limit("byEventoAndData", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -128,10 +137,10 @@ class InscriptionController extends Controller
             if ($inscription->getByEventoAndData($evento, $data)) {
                 $retObj = $inscription->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -142,7 +151,7 @@ class InscriptionController extends Controller
         $inscription = new Inscription($this->dataToken["subscriberId"] ?? 0);
 
         if (Helpers::request_limit("byEmail", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -151,10 +160,10 @@ class InscriptionController extends Controller
             if ($inscription->getByEmail($email, $ativo)) {
                 $retObj = $inscription->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -168,10 +177,10 @@ class InscriptionController extends Controller
             if ($inscription->confirmar($this->data()['id'])) {
                 $retObj = $inscription->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -185,7 +194,7 @@ class InscriptionController extends Controller
             $inscription->vagasValidas($chave, $data, $duplas);
             $retObj = $inscription->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -200,7 +209,7 @@ class InscriptionController extends Controller
                 $retObj = $inscription->getResult();
             }
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -213,7 +222,7 @@ class InscriptionController extends Controller
         if ($inscription->getById($id)) {
             $retObj = $inscription->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
         }
 
         $this->toJson($retObj);
@@ -243,7 +252,7 @@ class InscriptionController extends Controller
         $isLogged = $this->isLogged();
 
         if (!$isLogged) {
-            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('Acesso negado'))));
+            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Acesso negado'))));
             die;
         }
 

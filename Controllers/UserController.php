@@ -12,7 +12,10 @@ class UserController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -23,7 +26,7 @@ class UserController extends Controller
                     $retObj = $user->getResult();
                 }
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
             }
         }
 
@@ -35,7 +38,10 @@ class UserController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -45,7 +51,7 @@ class UserController extends Controller
                 $user->create($this->data());
                 $retObj = $user->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
             }
         }
 
@@ -57,7 +63,10 @@ class UserController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -73,7 +82,7 @@ class UserController extends Controller
                     $retObj = $this->delete($id);
                     break;
                 default:
-                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
                     break;
             }
         }
@@ -88,7 +97,7 @@ class UserController extends Controller
         if ($user->getById($id)) {
             $retObj = $user->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
         }
 
         $this->toJson($retObj);
@@ -119,7 +128,7 @@ class UserController extends Controller
         $isLogged = $this->isLogged();
 
         if (!$isLogged) {
-            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('Acesso negado'))));
+            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Acesso negado'))));
             die;
         }
         return $isLogged;

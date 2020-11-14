@@ -104,7 +104,7 @@ class Inscription extends Model
                     );
 
                     if (intval($this->result['data']['inscricoes']) >= $limite) {
-                        $this->result['message']['errors'][] = 'Todas as ' . $limite . ' vagas destinadas as cadeiras ' . $cadeira . ' foram preenchidas';
+                        $this->result['message']['errors'][] = array('show' => false, 'value' => 'Todas as ' . $limite . ' vagas destinadas as cadeiras ' . $cadeira . ' foram preenchidas');
                         $this->result['message']['hasError'] = true;
                     }
 
@@ -513,7 +513,7 @@ class Inscription extends Model
             if ($sql->rowCount() > 0) {
                 return true;
             } else {
-                $this->result['message']['errors'][] = 'Evento não está mais disponível';
+                $this->result['message']['errors'][] = array('show' => false, 'value' => 'Evento não está mais disponível');
                 $this->result['message']['hasError'] = true;
                 return false;
             }
@@ -525,23 +525,23 @@ class Inscription extends Model
     private function isValid($data): bool
     {
         if (empty($data['evento'])) {
-            $this->result['message']['errors'][] = 'Evento não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Evento não informado');
         }
 
         if (empty($data['email'])) {
-            $this->result['message']['errors'][] = 'E-mail não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'E-mail não informado');
         }
 
         if (empty($data['nome'])) {
-            $this->result['message']['errors'][] = 'Nome não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Nome não informado');
         }
 
         if (empty($data['sobrenome'])) {
-            $this->result['message']['errors'][] = 'Sobrenome não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Sobrenome não informado');
         }
 
         if (empty($data['area'])) {
-            $this->result['message']['errors'][] = 'Área não informado';
+            $this->result['message']['errors'][] = array('show' => false, 'value' => 'Área não informado');
         }
 
         if (count($this->result['message']['errors']) == 0) {
@@ -550,7 +550,7 @@ class Inscription extends Model
 
         if (count($this->result['message']['errors']) == 0) {
             if ($this->buscaEmailCadastradoParaOMesmoPeriodo(($data['id'] ?? 0), $data['data'], ($data['periodo'] ?? "UNIQUE"), $data['email'])) {
-                $this->result['message']['errors'][] = 'Você já possui uma inscrição para este período';
+                $this->result['message']['errors'][] = array('show' => false, 'value' => 'Você já possui uma inscrição para este período');
             }
         }
 

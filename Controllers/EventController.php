@@ -13,7 +13,10 @@ class EventController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -22,7 +25,7 @@ class EventController extends Controller
             $event->get();
             $retObj = $event->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -33,12 +36,15 @@ class EventController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
         if (Helpers::request_limit("getActivosToInc", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -48,7 +54,7 @@ class EventController extends Controller
             $event->getActivosToInc();
             $retObj = $event->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -59,12 +65,15 @@ class EventController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
         if (Helpers::request_limit("proximoEvento", SESSION_QTDE, SESSION_SECOND)) {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array("Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => "Desculpe, mas por segurança aguarde pelo " . SESSION_SECOND . " segundos para tentar novamente.")));
             $this->toJson($retObj);
             return;
         }
@@ -74,7 +83,7 @@ class EventController extends Controller
             $event->proximoEvento();
             $retObj = $event->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
         }
 
         $this->toJson($retObj);
@@ -85,7 +94,10 @@ class EventController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -95,7 +107,7 @@ class EventController extends Controller
                 $event->create($this->data());
                 $retObj = $event->getResult();
             } else {
-                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
             }
         }
 
@@ -107,7 +119,10 @@ class EventController extends Controller
         $retObj = array(
             'message' => array(
                 'hasError' => false,
-                'errors' => array()
+                'errors' => array(
+                    'show' => false,
+                    'value' => ''
+                )
             ),
         );
 
@@ -123,7 +138,7 @@ class EventController extends Controller
                     $retObj = $this->delete($id);
                     break;
                 default:
-                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Método ' . $this->method() . ' não disponível')));
+                    $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Método ' . $this->method() . ' não disponível')));
                     break;
             }
         }
@@ -138,7 +153,7 @@ class EventController extends Controller
         if ($event->getById($id)) {
             $retObj = $event->getResult();
         } else {
-            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('Usuário não cadastrado')));
+            $retObj = array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Usuário não cadastrado')));
         }
 
         $this->toJson($retObj);
@@ -171,7 +186,7 @@ class EventController extends Controller
         $isLogged = $this->isLogged();
 
         if (!$isLogged) {
-            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('Acesso negado'))));
+            $this->toJson(array('message' =>  array('hasError' => true, 'errors' => array('show' => false, 'value' => 'Acesso negado'))));
             die;
         }
         return $isLogged;
